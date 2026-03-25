@@ -1,0 +1,233 @@
+{
+  "info": {
+    "_postman_id": "b8e8a0f4-3a9f-4f0e-9d44-2f2be1d2d6d1",
+    "name": "Warehouse API - Module 16 Assignment",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Configured Postman collection for testing Product endpoints in the Spring Boot assignment."
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "productId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "updatedQuantity",
+      "value": "80",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Create Product",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Wireless Mouse\",\n  \"quantity\": 50,\n  \"price\": 25.99\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/products",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "products"
+          ]
+        },
+        "description": "Creates a new product and stores returned id into collection variable `productId`."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 201', function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "var responseJson = pm.response.json();",
+              "",
+              "pm.test('Response has id', function () {",
+              "    pm.expect(responseJson).to.have.property('id');",
+              "});",
+              "",
+              "if (responseJson.id !== undefined && responseJson.id !== null) {",
+              "    pm.collectionVariables.set('productId', String(responseJson.id));",
+              "}",
+              "",
+              "pm.test('Response has expected fields', function () {",
+              "    pm.expect(responseJson).to.have.property('name');",
+              "    pm.expect(responseJson).to.have.property('quantity');",
+              "    pm.expect(responseJson).to.have.property('price');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Get Product By ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/products/{{productId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "products",
+            "{{productId}}"
+          ]
+        },
+        "description": "Gets an existing product by id. Uses collection variable `productId`."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "var responseJson = pm.response.json();",
+              "",
+              "pm.test('Returned id matches requested id', function () {",
+              "    pm.expect(String(responseJson.id)).to.eql(pm.collectionVariables.get('productId'));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Update Product Stock",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/products/{{productId}}/stock?quantity={{updatedQuantity}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "products",
+            "{{productId}}",
+            "stock"
+          ],
+          "query": [
+            {
+              "key": "quantity",
+              "value": "{{updatedQuantity}}"
+            }
+          ]
+        },
+        "description": "Updates stock quantity for an existing product id."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "var responseJson = pm.response.json();",
+              "",
+              "pm.test('Success message is present', function () {",
+              "    pm.expect(responseJson).to.have.property('message');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Verify Updated Product",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/products/{{productId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "products",
+            "{{productId}}"
+          ]
+        },
+        "description": "Re-fetches product and verifies quantity equals `updatedQuantity`."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "var responseJson = pm.response.json();",
+              "",
+              "pm.test('Quantity was updated', function () {",
+              "    pm.expect(String(responseJson.quantity)).to.eql(pm.collectionVariables.get('updatedQuantity'));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Get Missing Product (404 Check)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/products/999999",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "products",
+            "999999"
+          ]
+        },
+        "description": "Negative test to verify not-found behavior for unknown id."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 404', function () {",
+              "    pm.response.to.have.status(404);",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
+
